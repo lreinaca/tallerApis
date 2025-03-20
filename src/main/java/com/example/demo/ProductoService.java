@@ -46,8 +46,8 @@ public class ProductoService {
 	}
 
 	// actualizar un producto
-	public Producto update(String id, Producto producto) {
-		return productoRepository.update(id, producto);
+	public Producto update(Producto producto) {
+		return productoRepository.update(producto);
 	}
 
 	// eliminar un producto
