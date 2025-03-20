@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+@RequestMapping("/api/productos")
 public class ProductoController {
 	private final ProductoService productoService;
 	
@@ -24,9 +26,9 @@ public class ProductoController {
 		this.productoService = productoService;
 	}
 
-	// Obtener todos los usuarios
+	// Obtener todos los productos 
 	@GetMapping
-	public ResponseEntity<List<Producto>> getAllUsuarios() {
+	public ResponseEntity<List<Producto>> getAllProducts() {
 		List<Producto> productos = productoService.findAll();
 		return new ResponseEntity<>(productos, HttpStatus.OK);
 	}
@@ -76,17 +78,18 @@ public class ProductoController {
 
 	// Ruta con parámetros de consulta (query string)
 	@GetMapping("/buscar")
-	public ResponseEntity<List<Producto>> buscarProducto(@RequestParam(required = false) String categoria,
+	public ResponseEntity<List<Producto>> findByFilter(@RequestParam(required = false) String categoria,
 			@RequestParam(required = false) String nombre, @RequestParam(defaultValue = "0") double precio, 
 			@RequestParam(defaultValue = "0") int stock) {
-		List<Producto> productos = productoService.buscarPorFiltros(categoria, nombre, precio, stock);
+		List<Producto> productos = (List<Producto>) findByFilter(categoria, nombre, precio, stock);
 		return new ResponseEntity<>(productos, HttpStatus.OK);
 	}
 
 
+	/*
 	// Ruta que lee cabeceras HTTP
 	@GetMapping("/auth")
-	public ResponseEntity<Producto> getUserByToken(@RequestHeader("Authorization") String authToken) {
+	public ResponseEntity<Producto> getProductByToken(@RequestHeader("Authorization") String authToken) {
 		Producto producto = productoService.findByAuthToken(authToken);
 		if (producto != null) {
 			return new ResponseEntity<>(producto, HttpStatus.OK);
@@ -94,5 +97,5 @@ public class ProductoController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 	}
-	
+	*/
 }
