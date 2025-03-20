@@ -35,9 +35,9 @@ public class ProductoRepository {
 	}
 
 	// actualizar un producto
-	public Producto update(String id, Producto producto) {
-		if (baseDeDatos.containsKey(id)) {
-			baseDeDatos.put(id, producto);
+	public Producto update(Producto producto) {
+		if (baseDeDatos.containsKey(producto.getId())) {
+			baseDeDatos.put(producto.getId(), producto);
 			return producto;
 		}
 		return null;
