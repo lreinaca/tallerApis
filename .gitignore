@@ -1,5 +1,4 @@
 
-Para git ignore 
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
