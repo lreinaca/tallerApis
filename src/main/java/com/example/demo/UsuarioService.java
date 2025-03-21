@@ -95,6 +95,9 @@ public class UsuarioService {
         return usuarioRepository.findByAuthToken(authToken);
     }
     
+    public List<Usuario> findByRole(String role) {
+		return usuarioRepository.findByRole(role);
+	}
 
     
 }

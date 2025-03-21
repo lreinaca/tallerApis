@@ -11,21 +11,24 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/productos")
+@RequestMapping("/eam/productos")
 public class ProductoController {
 	private final ProductoService productoService;
-	
+	private final UsuarioService usuarioService;
+
 	@Autowired
-	public ProductoController(ProductoService productoService) {
+	public ProductoController(ProductoService productoService, UsuarioService usuarioService) {
 		this.productoService = productoService;
+		this.usuarioService = usuarioService;
 	}
 
-	// Obtener todos los productos 
+	// Obtener todos los productos
 	@GetMapping
 	public ResponseEntity<List<Producto>> getAllProducts() {
 		List<Producto> productos = productoService.findAll();
@@ -34,7 +37,12 @@ public class ProductoController {
 
 	// Obtener un producto por ID
 	@GetMapping("/{id}")
-	public ResponseEntity<Producto> getProductoById(@PathVariable String id) {
+	public ResponseEntity<Producto> getProductoById(@PathVariable String id,
+			@RequestHeader("Authorization") String authToken) {
+		Usuario usuario = usuarioService.findByAuthToken(authToken);
+		if (usuario == null) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
 		Producto producto = productoService.findById(id);
 		if (producto != null) {
 			return new ResponseEntity<>(producto, HttpStatus.OK);
@@ -44,8 +52,13 @@ public class ProductoController {
 	}
 
 	// Crear un nuevo producto
-	@PostMapping
-	public ResponseEntity<Producto> createProducto(@RequestBody Producto producto) {
+	@PostMapping()
+	public ResponseEntity<Producto> createProducto(@RequestBody Producto producto,
+			@RequestHeader("X-User-Role") String userRole) {
+		List<Usuario> usuarioConPermisos = usuarioService.findByRole(userRole);
+		if (!userRole.equals("admin") || usuarioConPermisos == null) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
 		Producto newProducto = productoService.save(producto);
 		return new ResponseEntity<>(newProducto, HttpStatus.CREATED);
 	}
@@ -78,23 +91,19 @@ public class ProductoController {
 	// Ruta con parámetros de consulta (query string)
 	@GetMapping("/buscar")
 	public ResponseEntity<List<Producto>> findByFilter(@RequestParam(required = false) String categoria,
-			@RequestParam(required = false) String nombre, @RequestParam(defaultValue = "0") double precio, 
+			@RequestParam(required = false) String nombre, @RequestParam(defaultValue = "0") double precio,
 			@RequestParam(defaultValue = "0") int stock) {
 		List<Producto> productos = productoService.findByFilter(categoria, nombre, precio, stock);
 		return new ResponseEntity<>(productos, HttpStatus.OK);
 	}
 
-
 	/*
-	// Ruta que lee cabeceras HTTP
-	@GetMapping("/auth")
-	public ResponseEntity<Producto> getProductByToken(@RequestHeader("Authorization") String authToken) {
-		Producto producto = productoService.findByAuthToken(authToken);
-		if (producto != null) {
-			return new ResponseEntity<>(producto, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
-	}
-	*/
+	 * // Ruta que lee cabeceras HTTP
+	 * 
+	 * @GetMapping("/auth") public ResponseEntity<Producto>
+	 * getProductByToken(@RequestHeader("Authorization") String authToken) {
+	 * Producto producto = productoService.findByAuthToken(authToken); if (producto
+	 * != null) { return new ResponseEntity<>(producto, HttpStatus.OK); } else {
+	 * return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); } }
+	 */
 }
